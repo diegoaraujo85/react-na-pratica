@@ -16,7 +16,8 @@ interface PaginationProps {
 }
 
 export function Pagination({ items, page, pages }: PaginationProps) {
-  const [, setSearchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const per_page = searchParams.get('per_page') ? Number(searchParams.get('per_page')) : 10;
 
   function firstPage() {
     setSearchParams(params => {
@@ -58,6 +59,26 @@ export function Pagination({ items, page, pages }: PaginationProps) {
     })
   }
 
+  function goToPage(page: number) {
+    if (page < 1 || page > pages) {
+      return
+    }
+
+    setSearchParams(params => {
+      params.set('page', String(page))
+
+      return params
+    })
+  }
+
+  function setRowsPerPage(rows: string) {
+    setSearchParams(params => {
+      params.set('per_page', (rows))
+
+      return params
+    })
+  }
+
   return (
     <div className="flex text-sm items-center justify-between text-zinc-500">
       <span>Showing 10 of {items} items</span>
@@ -65,17 +86,26 @@ export function Pagination({ items, page, pages }: PaginationProps) {
         <div className="flex items-center gap-2">
           <span>Rows per page</span>
 
-          <Select defaultValue="10">
+          <Select defaultValue={String(per_page)} onValueChange={(value)=>setRowsPerPage((value))} >
             <SelectTrigger aria-label="Page" />
-            <SelectContent>
+            <SelectContent >
               <SelectItem value="10">10</SelectItem>
               <SelectItem value="20">20</SelectItem>
               <SelectItem value="50">50</SelectItem>
             </SelectContent>
           </Select>
         </div>
+        
+        <span className='flex flex-row gap-2 items-center'>Page 
+          <input 
+            className='max-h-96 w-16 p-1.5 text-zinc-100 tabular-nums rounded-md border border-zinc-800 bg-zinc-800/50 text-center' 
+            value={page} 
+            onChange={(e) => goToPage(Number(e.target.value))} 
+          />
+           of {pages}
+        </span>
 
-        <span>Page {page} of {pages}</span>
+        {/* <span>Page {page} of {pages}</span> */}
 
         <div className="space-x-1.5">
           <Button onClick={firstPage} size="icon" disabled={page - 1 <= 0}>
